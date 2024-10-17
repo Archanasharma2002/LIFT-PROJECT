@@ -1,33 +1,64 @@
-const callBtns = document.querySelectorAll('.btn');
+const callBtns = document.querySelectorAll('.call');
 const liftImages = document.querySelectorAll('.lift-img');
-const arrivalSound = document.getElementsByClassName("lift-sound")[0];
+const arrivalSound = document.querySelector('#arrival-sound');
+
 let liftStates = Array(liftImages.length).fill('idle');
-let liftCurrentPositions = Array.from(liftImages).map(lift => lift.getBoundingClientRect().top + window.scrollY);
-let callQueue = [];
+let liftCurrentPositions = Array.from(liftImages)
+    .map(lift => lift.getBoundingClientRect().top + window.scrollY);
 
 callBtns.forEach((btn) => {
-    btn.classList.add('btn-call');
-    btn.style.backgroundColor = 'green';
-    btn.addEventListener("click", () => {
-        console.log('Button clicked');
-        btn.classList.remove('btn-call');
-        btn.classList.add('btn-waiting');
-        btn.innerHTML = 'Call (Waiting...)';
-        btn.style.backgroundColor = 'red';
-        btn.style.color = 'white';
-        btn.disabled = true;
+    if (btn.classList.contains('call')) {
+        btn.addEventListener("click", () => {
+            if(btn.classList.contains('btn-waiting') || btn.classList.contains('btn-arrived') ){
+                return;
+            }
+            btn.classList.add('btn-waiting');
+            btn.innerHTML = 'waiting';
 
-        const buttonRect = btn.getBoundingClientRect();
-        const btnY = buttonRect.top + window.scrollY;
-        const nearestLiftIndex = findNearestAvailableLift(btnY);
+            const buttonRect = btn.getBoundingClientRect();
+            const btnY = buttonRect.top + window.scrollY;
+            const btnX = buttonRect.left + window.scrollX; 
 
-        if (nearestLiftIndex !== -1) {
-            moveLift(nearestLiftIndex, btnY, btn);
-        } else {
-            callQueue.push({ btnY, btn });
-            console.log('No available lifts. Adding to queue.');
-        }
-    });
+            const nearestLiftIndex = findNearestAvailableLift(btnY);
+
+            const allLiftsAtSamePosition = liftCurrentPositions.every(position => position === btnY);
+    
+            
+                if (allLiftsAtSamePosition) {
+                    btn.classList.remove('btn-waiting');
+                    btn.classList.add('btn-arrived');
+                    btn.innerHTML = 'Arrived';
+                   
+                    liftImages.forEach(lift => {
+                        lift.classList.remove('lift-black'); 
+                        lift.classList.add('lift-green');  
+                    });
+
+                    setTimeout(() => {
+                        btn.classList.remove('btn-arrived');
+                        btn.classList.add('call');
+                        btn.innerHTML = 'call';
+
+                        liftImages.forEach(lift => {
+                            lift.classList.remove('lift-green'); 
+                            lift.classList.add('lift-black');  
+                        });
+
+                    }, 2000);
+                    console.log('All lifts are already at the final position');
+                }
+
+
+
+         else if (nearestLiftIndex !== -1) {
+                    moveLift(nearestLiftIndex, btnY, btn, btnX); 
+                } else {
+                    console.log('All lifts are currently busy');
+                    btn.innerHTML = 'waiting';
+                    AvailableLift(btnY, btn);
+                }
+        });
+    }
 });
 
 function findNearestAvailableLift(targetY) {
@@ -35,7 +66,7 @@ function findNearestAvailableLift(targetY) {
     let shortestDistance = Infinity;
 
     liftCurrentPositions.forEach((liftY, index) => {
-        if (liftStates[index] === 'idle' && liftCurrentPositions[index] !== targetY) {
+        if (liftStates[index] === 'idle' && liftY !== targetY) {
             const distance = Math.abs(targetY - liftY);
             if (distance < shortestDistance) {
                 shortestDistance = distance;
@@ -44,109 +75,131 @@ function findNearestAvailableLift(targetY) {
         }
     });
 
-    console.log('Nearest lift index:', nearestLiftIndex);
     return nearestLiftIndex;
 }
 
-function moveLift(liftIndex, targetY, btn) {
+function moveLift(liftIndex, targetY, btn) { 
     const lift = liftImages[liftIndex];
-
-    if (!lift.style.top) {
-        lift.style.top = `${liftCurrentPositions[liftIndex]}px`;
-    }
-
     lift.style.position = 'absolute';
     lift.classList.remove('lift-black');
     lift.classList.add('lift-red');
-    lift.offsetHeight;
 
     const currentLiftY = liftCurrentPositions[liftIndex];
     const distance = Math.abs(targetY - currentLiftY);
-    const speed = 80;
-    const arrivalTime = (distance / speed) * 1000;
 
-    updateTimeRemaining(liftIndex, lift, targetY, btn, arrivalTime);
+    const speed = 40; 
+    const arrivalTime = (distance / speed) * 1000; 
 
-    lift.style.transition = `top ${arrivalTime / 1000}s ease`;
+    let totalSeconds = Math.floor(arrivalTime / 1000);
+    
+    const liftRect = lift.getBoundingClientRect();
+    const liftX = liftRect.left + window.scrollX; 
+    const messageElement = displayMessage('', liftX, targetY);
+
+    if (totalSeconds <= 1) {
+        messageElement.textContent = `0 min 1 sec`;
+        console.log('1 second');
+
+        setTimeout(() => {
+            messageElement.remove(); 
+            btn.classList.remove('btn-waiting');
+            btn.classList.add('btn-arrived');
+            btn.innerHTML = 'Arrived';
+            lift.classList.remove('lift-red');
+            lift.classList.add('lift-green');
+            arrivalSound.play(); 
+        }, arrivalTime);
+
+    } else {
+        const countdown = setInterval(() => {
+            if (totalSeconds <= 0) {
+                clearInterval(countdown);
+                console.log('Lift arrived');
+                return;
+            }
+
+            let minutes = Math.floor(totalSeconds / 60);
+            let seconds = totalSeconds % 60;
+
+            messageElement.textContent = `${minutes} mins ${seconds} sec `;
+            console.log(`${totalSeconds} seconds remaining`);
+
+            totalSeconds--;
+        }, 1000);
+    }
+  
+
+    lift.style.top = `${currentLiftY}px`;
+    lift.style.transition = `top ${arrivalTime / 1000}s `;
+
+
     setTimeout(() => {
-        lift.style.top = `${targetY}px`;
-    }, 300);
+        lift.style.top = `${targetY}px`; 
+    }, 2000);
 
     liftCurrentPositions[liftIndex] = targetY;
-    liftStates[liftIndex] = 'moving';
-    lift.style.backgroundColor = 'red';
+    liftStates[liftIndex] = 'moving'; 
 
     setTimeout(() => {
         btn.classList.remove('btn-waiting');
         btn.classList.add('btn-arrived');
         btn.innerHTML = 'Arrived';
-        btn.style.backgroundColor = 'transparent';
-        btn.style.border = '2px solid green';
-        btn.style.color = 'green';
         lift.classList.remove('lift-red');
         lift.classList.add('lift-green');
-        lift.style.backgroundColor = 'green';
+        arrivalSound.play(); 
+        messageElement.remove();
 
-        arrivalSound.play().catch(error => {
-            console.error('Error playing sound:', error);
-        });
-    }, arrivalTime);
+    }, arrivalTime+1500);
 
     setTimeout(() => {
-        resetButtonAndLift(liftIndex, btn);
-    }, arrivalTime + 2000);
+        resetButtonAndLift(liftIndex, btn); 
+    }, arrivalTime + 200+2000); 
 }
 
-function updateTimeRemaining(liftIndex, lift, targetY, btn, arrivalTime) {
-    const startTime = Date.now();
-    const interval = setInterval(() => {
-        const currentTime = Date.now();
-        const elapsedTime = currentTime - startTime;
-        const remainingTime = arrivalTime - elapsedTime;
+function displayMessage(text,liftX, targetY) {
+    const messageElement = document.createElement('div');
+    messageElement.textContent = text;
 
-        if (remainingTime <= 0) {
-            clearInterval(interval);
-            btn.innerHTML = `Arrived`;
-        } else {
-            const totalSeconds = Math.floor(remainingTime / 1000);
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
+    messageElement.style.position = 'absolute';
+    messageElement.style.top = `${targetY}px`;
+    messageElement.style.left = `${liftX}px`; 
+    messageElement.style.transform = 'translateX(-35%)'; 
+    messageElement.style.color = 'black';
+    messageElement.style.padding = '5px 10px';
+    messageElement.style.borderRadius = '5px';
+    messageElement.style.zIndex = '1000'; 
+    messageElement.style.whiteSpace = 'nowrap'; 
 
-            btn.innerHTML = `Call (${minutes}m ${seconds}s)`;
-        }
-    }, 1000);
+    document.body.appendChild(messageElement);
+
+    return messageElement;
 }
 
 function resetButtonAndLift(liftIndex, btn) {
-    btn.classList.remove('btn-arrived');
-    btn.classList.add('btn-call');
-    btn.innerHTML = 'Call';
-    btn.style.backgroundColor = 'green';
-    btn.style.color = 'white';
-    btn.style.border = '';
-    btn.disabled = false;
+    setTimeout(() => {
+        btn.classList.remove('btn-arrived');
+        btn.classList.add('call');
+        btn.innerHTML = 'call';
 
-    const lift = liftImages[liftIndex];
-    lift.classList.remove('lift-green');
-    lift.classList.add('lift-black');
-    lift.style.backgroundColor = '';
-    liftStates[liftIndex] = 'idle';
+        const lift = liftImages[liftIndex];
+        lift.classList.remove('lift-green');
+        lift.classList.add('lift-black');
 
-    if (callQueue.length > 0) {
-        const { btnY, btn: queuedBtn } = callQueue.shift();
-        const nearestLiftIndex = findNearestAvailableLift(btnY);
+        setTimeout(() => {
+            liftStates[liftIndex] = 'idle'; 
+        }, 2000); 
+    }, 2000); 
+}
+
+
+function AvailableLift(targetY, btn) {
+    const pollingInterval = setInterval(() => {
+        const nearestLiftIndex = findNearestAvailableLift(targetY);
+
         if (nearestLiftIndex !== -1) {
-            moveLift(nearestLiftIndex, btnY, queuedBtn);
+            clearInterval(pollingInterval); 
+            moveLift(nearestLiftIndex, targetY, btn); 
         }
-    }
+    }, 2000); 
 }
 
-function resetButton(btn) {
-    btn.style.backgroundColor = 'green';
-    btn.style.color = 'white';
-    btn.style.border = '';
-    btn.classList.remove('btn-waiting');
-    btn.classList.add('btn-call');
-    btn.innerHTML = 'Call';
-    btn.disabled = false;
-}

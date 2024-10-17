@@ -1,87 +1,92 @@
-  *{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+body{
+  font-family: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+}
+.main-wrapper{
+  margin: 0 120px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+.heading{
+  text-align: center;
+}
+.floor-wrap{
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.floor{
-    display: flex;
-}
-.lift {
-  border: 1px solid #e1dddd;
-  height: 88px;
-  width: 191px;
+.lift{
+  border:1px solid rgb(171, 169, 169);
+  width: 180px;
+  height: 70px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-  .floor-no{
-    width: 76px;
-    font-size: 23px;
-  }
-  button{
-    width: 166px;
-  }
-  .call{
-    background-color: green;
-    margin-left: 10px;
-    margin-top: 20px;
-    height: 59px;
-    border: none;
-    color: white;
-    border-radius: 5px;
-    font-size: 25px;
-  }
-  .waiting{
-    background-color: red;
-    margin-left: 10px;
-    margin-top: 20px;
-    height: 32px;
-    border: none;
-    color: white;
-  }
-  .arrived{
-   color: white;
-    margin-left: 10px;
-    margin-top: 20px;
-    height: 32px;
-    border: none;
-  }
-  .lift img{
-    height: 58px;
-    width: 58px;
-    margin-left: 20px;
-    margin-top: 10px;
-  }
-  .floor-wrap{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-  .img-lift{
-    width: 57px;
-    height: 60px;
-    margin-left: 10px;
-    margin-top: 10px;
-  }
- /* .fill-red{
-  fill: red;
- }
- .fill-green{
-  fill: green;
- }
- .fill-orange{
-  fill: orange;
- } */
- #travel-time-display {
-  margin-top: 20px;
-  font-size: 18px;
-  font-weight: bold;
+.btn{
+  color: white;
+  padding: 10px 20px;
+  outline: none;
+  border: none;
+  border-radius: 4px;
+  font-size: 20px;
+  margin:0 20px 0;
+  width: 120px;
+
 }
-.lift-timer{
+
+.text{
+  width: 90px;
+}
+
+.call{
+  background-color: #11500b;
+
+}
+.btn-waiting{
+  background-color: rgb(238, 73, 73);
+}
+.btn-arrived{
+  background-color: white;
+  color: #11500b;
+  border: 1px solid #11500b;
+}
+
+.floor-wrapper{
   display: flex;
-  justify-content: center;
   align-items: center;
-  
 }
+.lift-img{
+  height: 50px;
+  width: 50px;
+}
+
+.lift-red{
+  fill:red;
+}
+.lift-green{
+  fill:#11500b;
+}
+.lift-black{
+  fill:black;
+}
+
+.waiting-time{
+  font-size: 14px;
+}
+
+.lift-waiting-time{
+position : absolute;
+left : 50%; 
+ transform : translateX(-50%); 
+background-color : rgba(0, 0, 0, 0.8); 
+color : white;
+padding : 5px 10px;
+border-radius : 5px;
+z-index : 1000; 
+white-space : nowrap; 
+
+}
+
+
