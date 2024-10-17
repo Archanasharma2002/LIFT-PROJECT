@@ -7,24 +7,30 @@
 .floor{
     display: flex;
 }
-  .lift{
-    border: 1px solid #000;
-    height: 80px;
-    width: 100px;
-  }
+.lift {
+  border: 1px solid #e1dddd;
+  height: 88px;
+  width: 191px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
   .floor-no{
-    width: 50px;
+    width: 76px;
+    font-size: 23px;
   }
   button{
-    width: 90px;
+    width: 166px;
   }
   .call{
     background-color: green;
     margin-left: 10px;
     margin-top: 20px;
-    height: 32px;
+    height: 59px;
     border: none;
     color: white;
+    border-radius: 5px;
+    font-size: 25px;
   }
   .waiting{
     background-color: red;
@@ -42,8 +48,8 @@
     border: none;
   }
   .lift img{
-    height: 40px;
-    width: 40px;
+    height: 58px;
+    width: 58px;
     margin-left: 20px;
     margin-top: 10px;
   }
@@ -54,8 +60,8 @@
     align-items: center;
   }
   .img-lift{
-    width: 50px;
-    height: 50px;
+    width: 57px;
+    height: 60px;
     margin-left: 10px;
     margin-top: 10px;
   }
@@ -68,3 +74,14 @@
  .fill-orange{
   fill: orange;
  } */
+ #travel-time-display {
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+.lift-timer{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+}
